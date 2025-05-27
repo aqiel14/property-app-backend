@@ -9,7 +9,7 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3001;
 
-app.use(cors({ origin: "http://localhost:3000" })); // adjust to your frontend URL
+app.use(cors({ origin: process.env.FRONTEND_URL })); // adjust to your frontend URL
 app.use(express.json());
 
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -26,7 +26,7 @@ app.post("/api/send-login-link", async (req, res) => {
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: "http://localhost:3000/dashboard",
+      emailRedirectTo: `${process.env.FRONTEND_URL}/dashboard`,
     },
   });
 
