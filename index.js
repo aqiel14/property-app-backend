@@ -47,7 +47,7 @@ app.post("/api/send-login-link", async (req, res) => {
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: `${process.env.FRONTEND_URL}/dashboard` },
+    options: { emailRedirectTo: `http://localhost:3000/dashboard` },
   });
 
   if (error) return res.status(400).json({ error: error.message });
@@ -75,8 +75,30 @@ app.post("/api/send-login-link2", async (req, res) => {
 });
 
 app.get("/api/properties", async (req, res) => {
+  console.log("REQ123");
   try {
-    const { data, error } = await supabase.from("properties").select("*");
+    const token = req.headers.authorization?.replace("Bearer ", "");
+
+    if (!token) {
+      return res.status(401).json({ error: "No token provided" });
+    }
+
+    // Decode token and get user
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser(token);
+
+    if (userError || !user) {
+      return res.status(401).json({ error: "Invalid or expired token" });
+    }
+
+    console.log("user", user);
+
+    const { data, error } = await supabase
+      .from("properties")
+      .select("*")
+      .eq("user_id", user.id);
     if (error) throw error;
     res.json(data);
   } catch (error) {
