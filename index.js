@@ -9,7 +9,28 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3001;
 
-app.use(cors({ origin: process.env.FRONTEND_URL })); // adjust to your frontend URL
+const allowedOrigins = [
+  "http://localhost:3000",
+  process.env.FRONTEND_URL, // e.g. "https://property-app-amber.vercel.app"
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // allow requests with no origin (e.g. mobile apps, curl, or same-origin)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      callback(new Error(`Origin ${origin} not allowed by CORS`));
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 const supabaseUrl = process.env.SUPABASE_URL;
