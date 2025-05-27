@@ -43,12 +43,11 @@ const upload = multer({ storage: multer.memoryStorage() });
 app.post("/api/send-login-link", async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: "Email is required" });
+  console.log("✨ FRONTEND_URL is:", process.env.FRONTEND_URL);
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: {
-      emailRedirectTo: `${process.env.FRONTEND_URL}/dashboard`,
-    },
+    options: { emailRedirectTo: `${process.env.FRONTEND_URL}/dashboard` },
   });
 
   if (error) return res.status(400).json({ error: error.message });
